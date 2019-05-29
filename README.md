@@ -1,3 +1,5 @@
+Nicklas Spendler Christensen
+
 # The Awesome Newspage
 
 ## Installation
