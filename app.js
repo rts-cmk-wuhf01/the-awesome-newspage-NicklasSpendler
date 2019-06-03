@@ -31,7 +31,7 @@ require('./server/routes/routes.js')(app);
  * og billeder direkte fra public mappen, efter alle routes er kørt */
 app.use(express.static('public'));
 
-
+app.locals.dateAndTime = require('date-and-time');
 
 // start serveren på port 3000 
 const port = 3000;
