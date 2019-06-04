@@ -1,0 +1,19 @@
+
+<ol>
+    <!-- Single Comment Area -->
+    <% postCommments.forEach(comment => { %>
+                <li class="single_comment_area">
+                <div class="comment-content d-flex">
+                    <div class="comment-author">
+                        <img src="<%= comment.imgSrc %>" alt="author">
+                    </div>
+                    <!-- Comment Meta -->
+                    <div class="comment-meta">
+                        <a href="#" class="post-author"><%= comment.commentersName%></a>
+                        <a href="#" class="post-date"><%= comment.time%></a>
+                        <p><%= comment.textContent%></p>
+                    </div>
+                </div>
+            </li>
+            <% }); %>
+</ol>
