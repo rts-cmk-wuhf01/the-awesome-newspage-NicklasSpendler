@@ -1,4 +1,23 @@
+const mysql = require('../config/mysql')
+
 module.exports = (app) => {
+
+   let popularNews = [
+      {
+         "textContent": "lorem",
+         "time": "2019-04-14 07:50:14"
+      },{
+         "textContent": "lorem",
+         "time": "2019-04-14 07:50:14"
+      },{
+         "textContent": "lorem",
+         "time": "2019-04-14 07:50:14"
+      },{
+         "textContent": "lorem",
+         "time": "2019-04-14 07:50:14"
+      }
+   ]
+
    let editorsPicks = [
       {
          "textContent": "Orci varius natoque penatibus et magnis dis parturient montes.",
@@ -27,20 +46,33 @@ module.exports = (app) => {
       },
    ]
 
-   let popularNews = [
-   {
-      "textContent": "Amet, consectetur adipiscing elit. Nam eu metus sit amet odio sodales.",
-      "time": "2019-04-14 07:50:14"
-   },{
-      "textContent": "Consectetur adipiscing elit. Nam eu metus sit amet odio sodales placer.",
-      "time": "2019-04-14 07:00:14"
-   },{
-      "textContent": "Adipiscing elit. Nam eu metus sit amet odio sodales placer. Sed varius leo.",
-      "time": "2019-04-14 10:00:14"
-   },{
-      "textContent": "Eu metus sit amet odio sodales placer. Sed varius leo ac...",
-      "time": "2019-04-14 07:00:14"
-   }]
+   let latestnews = [
+      {
+         "textContent": "Orci varius natoque penatibus et magnis dis parturient montes.",
+         "imgSrc": "img/bg-img/1.jpg",
+         "time": "2019-04-14 07:50:14"
+      },{
+         "textContent": "Orci varius natoque penatibus et magnis dis parturient montes.",
+         "imgSrc": "img/bg-img/2.jpg",
+         "time": "2019-04-14 07:20:14"
+      },{
+         "textContent": "Orci varius natoque penatibus et magnis dis parturient montes.",
+         "imgSrc": "img/bg-img/3.jpg",
+         "time": "2019-04-14 07:20:14"
+      },{
+         "textContent": "Orci varius natoque penatibus et magnis dis parturient montes.",
+         "imgSrc": "img/bg-img/4.jpg",
+         "time": "2019-04-14 07:20:14"
+      },{
+         "textContent": "Orci varius natoque penatibus et magnis dis parturient montes.",
+         "imgSrc": "img/bg-img/5.jpg",
+         "time": "2019-04-14 07:20:14"
+      },{
+         "textContent": "Orci varius natoque penatibus et magnis dis parturient montes.",
+         "imgSrc": "img/bg-img/6.jpg",
+         "time": "2019-04-14 07:20:14"
+      },
+   ]
 
    let news = [
       {
@@ -114,10 +146,17 @@ module.exports = (app) => {
       }
    ]
 
-   app.get('/', (req, res, next) => {
+   app.get('/', async (req, res, next) => {
+      let db = await mysql.connect();
+
+      let [recommendedPost] = await db.execute('SELECT articles.article_title, newscategories.categoryName, images.img_src FROM articles INNER JOIN images on articles.fk_img_id = images.img_id INNER JOIN newscategories on articles.fk_category_id = newscategories.category_id');
+
+      
       res.render('home', {
-         "news": news,
+         "latestnews": latestnews,
          "popularNews": popularNews,
+         "recommendedPost": recommendedPost,
+         "news": news,
          "comments": comments,
          "editorsPicks": editorsPicks
       });
@@ -135,7 +174,7 @@ module.exports = (app) => {
    app.get('/contact', (req, res, next) => {
       res.render('contact');
    });
-   app.get('/single-post', (req, res, next) => {
+   app.get('/single-post',  (req, res, next) => {
       res.render('single-post', {
          "news": news,
          "popularNews": popularNews,
@@ -144,4 +183,10 @@ module.exports = (app) => {
       });
    });
 
+   app.get('/test', async  (req, res, next) => {
+      let db = await mysql.connect();
+      let [latestnews] = await db.execute('SELECT articles.article_title, newscategories.categoryName, images.img_src FROM articles INNER JOIN images on articles.fk_img_id = images.img_id INNER JOIN newscategories on articles.fk_category_id = newscategories.category_id');
+
+      res.send(latestnews)
+   });
 };
