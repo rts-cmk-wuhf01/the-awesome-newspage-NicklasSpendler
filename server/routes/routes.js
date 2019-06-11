@@ -189,4 +189,17 @@ module.exports = (app) => {
 
       res.send(latestnews)
    });
+   app.get('/test2/:articleID', async  (req, res, next) => {
+      let db = await mysql.connect();
+      let [latestnews] = await db.execute('SELECT articles.article_title, articles.article_text, articles.article_postdate, articles.article_likes, newscategories.categoryName, images.img_src, AUTHORS.author_name FROM `articles` INNER JOIN images ON articles.fk_img_id = images.img_id INNER JOIN authors ON articles.fk_author_id = authors.author_id INNER JOIN newscategories ON articles.fk_category_id = newscategories.category_id WHERE articles.article_id = ?',[req.params.articleID]);
+
+      res.render('single-post-test', {
+         "latestnews": latestnews,
+         "postCommments": postCommments,
+         "popularNews": popularNews,
+         "latestnews": latestnews,
+         "news": news,
+         "comments": comments,
+      })
+   });
 };
