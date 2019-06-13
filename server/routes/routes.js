@@ -173,7 +173,12 @@ module.exports = (app) => {
 
       let [headerCategories] = await db.execute('SELECT * FROM `newscategories`');
 
-      let [shownCategory] = await db.execute('SELECT * FROM articles where fk_category_id = ?',[req.params.categoryID])
+      let [shownCategory] = await db.execute(`SELECT article_title, articleImage.img_src, articles.article_postdate, articles.article_likes,authors.author_name, newscategories.categoryName, article_summary
+      FROM articles
+      INNER JOIN images as articleImage ON articles.fk_img_id = articleImage.img_id
+      INNER JOIN authors ON articles.fk_author_id = authors.author_id
+      INNER JOIN newscategories ON articles.fk_category_id = newscategories.category_id
+      where fk_category_id = ?`,[req.params.categoryID])
 
       res.render('catagories-post',{
          "headerCategories": headerCategories,
@@ -183,12 +188,20 @@ module.exports = (app) => {
          "comments": comments
       });
    });
-   app.get('/contact', (req, res, next) => {
-      res.render('contact');
+   app.get('/contact', async (req, res, next) => {
+      let db = await mysql.connect();
+
+      let [headerCategories] = await db.execute('SELECT * FROM `newscategories`');
+
+      res.render('contact',{
+         "headerCategories": headerCategories
+      });
    });
    app.get('/single-post/:articleID', async  (req, res, next) => {
 
       let db = await mysql.connect();
+
+      let [headerCategories] = await db.execute('SELECT * FROM `newscategories`');
 
       let [articlePost] = await db.execute(`SELECT articles.article_title, articles.article_text, articles.article_postdate, articles.article_likes, newscategories.categoryName, articleImage.img_src as articleImage, authors.author_name, authors.author_about, authorImage.img_src as authorImage FROM articles 
 
@@ -206,13 +219,19 @@ module.exports = (app) => {
          "latestnews": latestnews,
          "news": news,
          "comments": comments,
+         "headerCategories": headerCategories
       });
    });
 
-   app.get('/test', async  (req, res, next) => {
+   app.get('/test/:categoryID', async  (req, res, next) => {
       let db = await mysql.connect();
-      let [latestnews] = await db.execute('SELECT * FROM `newscategories`');
+      let [shownCategory] = await db.execute(`SELECT article_title, article_text, articleImage.img_src, articles.article_postdate, articles.article_likes, authors.author_name, newscategories.categoryName, article_summary
+      FROM articles
+      INNER JOIN images as articleImage ON articles.fk_img_id = articleImage.img_id
+      INNER JOIN authors ON articles.fk_author_id = authors.author_id
+      INNER JOIN newscategories ON articles.fk_category_id = newscategories.category_id
+      where fk_category_id = ?`,[req.params.categoryID])
 
-      res.send(latestnews[0])
+      res.send(shownCategory)
    });
 };
