@@ -5,14 +5,50 @@ module.exports = (app) => {
    async function getCategories() {
       let db = await mysql.connect();
       let [categories] = await db.execute(`
-         SELECT category_id, categoryName 
+         SELECT * 
          FROM newscategories
          ORDER BY categoryName ASC`);
       db.end();
       return categories;
    }
 
-   let editorsPicks = [{
+   async function recommendedPostFunc(){
+      let db = await mysql.connect();
+      let [recommendedPost] = await db.execute('SELECT articles.article_title, newscategories.categoryName, images.img_src FROM articles INNER JOIN images on articles.fk_img_id = images.img_id INNER JOIN newscategories on articles.fk_category_id = newscategories.category_id');
+      return recommendedPost;
+   }
+
+   async function latestnewsFunc(){
+      let db = await mysql.connect();
+      let [latestnews] = await db.execute(`SELECT newscategories.category_id, newscategories.categoryName, articles.article_id, articles.article_title, articleImage.img_src, articles.article_postdate
+      FROM newscategories
+      INNER JOIN articles ON fk_category_id = newscategories.category_id
+      INNER JOIN images as articleImage ON articles.fk_img_id = articleImage.img_id
+      WHERE articles.article_id = (
+         SELECT articles.article_id
+         FROM articles
+         WHERE 	articles.fk_category_id = newscategories.category_id
+         ORDER BY articles.article_postdate DESC
+         limit 1)
+      ORDER by articles.article_postdate desc`)
+      return latestnews;
+   }
+
+   async function popularNewsFunc(){
+      let db = await mysql.connect();
+      let [popularNews] = await db.execute(`SELECT article_title, article_postdate, article_likes, article_id
+      FROM articles
+      ORDER BY article_likes desc
+      limit 4`)
+      return popularNews
+   }
+
+   async function shownCategoryFunc(){
+      let db = await mysql.connect();
+
+   }
+   let editorsPicks = [
+      {
       "textContent": "Orci varius natoque penatibus et magnis dis parturient montes.",
       "imgSrc": "/img/bg-img/1.jpg",
       "time": "2019-04-14 07:50:14"
@@ -38,7 +74,8 @@ module.exports = (app) => {
       "time": "2019-04-14 07:20:14"
    }, ]
 
-   let news = [{
+   let news = [
+      {
       "picture": "/img/bg-img/19.jpg",
       "category": "Fincance",
       "textContent": "Pellentesque mattis arcu massa, nec fringilla turpis eleifend id.",
@@ -70,7 +107,8 @@ module.exports = (app) => {
       "time": "2019-04-14 07:00:14"
    }]
 
-   let comments = [{
+   let comments = [
+      {
       "textContent": "Facebook is offering facial recognition...",
       "commentersName": "Jamie Smith",
       "time": "2019-04-14 07:00:14"
@@ -106,63 +144,41 @@ module.exports = (app) => {
    }]
 
    app.get('/', async (req, res, next) => {
-      let db = await mysql.connect();
-      let [headerCategories] = await db.execute('SELECT * FROM `newscategories`');
+      let headerCategories = await getCategories();
 
-      let [recommendedPost] = await db.execute('SELECT articles.article_title, newscategories.categoryName, images.img_src FROM articles INNER JOIN images on articles.fk_img_id = images.img_id INNER JOIN newscategories on articles.fk_category_id = newscategories.category_id');
+      let recommendedPost = await recommendedPostFunc();
 
-      let [latestnews] = await db.execute(`SELECT newscategories.category_id, newscategories.categoryName, articles.article_id, articles.article_title, articleImage.img_src, articles.article_postdate
-      FROM newscategories
-      INNER JOIN articles ON fk_category_id = newscategories.category_id
-      INNER JOIN images as articleImage ON articles.fk_img_id = articleImage.img_id
-      WHERE articles.article_id = (
-         SELECT articles.article_id
-         FROM articles
-         WHERE 	articles.fk_category_id = newscategories.category_id
-         ORDER BY articles.article_postdate DESC
-         limit 1)
-      ORDER by articles.article_postdate desc`)
+      let latestnews = await latestnewsFunc();
 
-      let [popularNews] = await db.execute(`SELECT article_title, article_postdate, article_likes, article_id
-      FROM articles
-      ORDER BY article_likes desc
-      limit 4`)
+      let popularNews = await popularNewsFunc();
 
       res.render('home', {
          "latestnews": latestnews,
          "headerCategories": headerCategories,
          "popularNews": popularNews,
          "recommendedPost": recommendedPost,
-         "news": news,
-         "comments": comments,
          "editorsPicks": editorsPicks
       });
    });
+
    app.get('/about', async (req, res, next) => {
+      let headerCategories = await getCategories();
 
-      let db = await mysql.connect();
-
-      let [headerCategories] = await db.execute('SELECT * FROM `newscategories`');
-
-      let [popularNews] = await db.execute(`SELECT article_title, article_postdate, article_likes, article_id
-      FROM articles
-      ORDER BY article_likes desc
-      limit 4`)
+      let popularNews = await popularNewsFunc();
 
       res.render('about', {
          "headerCategories": headerCategories,
          "popularNews": popularNews
       });
    });
+
    app.get('/catagories-post/:categoryID', async (req, res, next) => {
       let db = await mysql.connect();
+      let headerCategories = await getCategories();
 
-      let [popularNews] = await db.execute(`SELECT article_title, article_postdate, article_likes, article_id
-      FROM articles
-      ORDER BY article_likes desc
-      limit 4`)
+      let latestnews = await latestnewsFunc()
 
-      let [headerCategories] = await db.execute('SELECT * FROM `newscategories`');
+      let popularNews = await popularNewsFunc();
 
       let [shownCategory] = await db.execute(`SELECT article_title, articleImage.img_src, articles.article_postdate, articles.article_likes,authors.author_name, newscategories.categoryName, article_summary, article_id
       FROM articles
@@ -171,27 +187,17 @@ module.exports = (app) => {
       INNER JOIN newscategories ON articles.fk_category_id = newscategories.category_id
       where fk_category_id = ?`, [req.params.categoryID])
 
-      let [latestnews] = await db.execute(`SELECT newscategories.category_id, newscategories.categoryName, articles.article_id, articles.article_title, articleImage.img_src, articles.article_postdate
-      FROM newscategories
-      INNER JOIN articles ON fk_category_id = newscategories.category_id
-      INNER JOIN images as articleImage ON articles.fk_img_id = articleImage.img_id
-      WHERE articles.article_id = (
-         SELECT articles.article_id
-         FROM articles
-         WHERE 	articles.fk_category_id = newscategories.category_id
-         ORDER BY articles.article_postdate DESC
-         limit 1)
-      ORDER by articles.article_postdate desc`)
 
+      
       res.render('catagories-post', {
          "headerCategories": headerCategories,
          "shownCategory": shownCategory,
          "latestnews": latestnews,
-         "news": news,
          "popularNews": popularNews,
          "comments": comments
       });
    });
+
    app.get('/contact', async (req, res, next) => {
       let db = await mysql.connect();
 
@@ -235,7 +241,6 @@ module.exports = (app) => {
             });
 
          } else {
-            console.log("error check")
             let db = await mysql.connect();
             let result = await db.execute(`
                INSERT INTO messages 
@@ -267,7 +272,7 @@ module.exports = (app) => {
 
       let db = await mysql.connect();
 
-      let [headerCategories] = await db.execute('SELECT * FROM `newscategories`');
+      let headerCategories = await getCategories();
 
       let [articlePost] = await db.execute(`SELECT articles.article_title, articles.article_text, articles.article_postdate, articles.article_likes, newscategories.categoryName, articleImage.img_src as articleImage, authors.author_name, authors.author_about, authorImage.img_src as authorImage FROM articles 
 
@@ -278,22 +283,9 @@ module.exports = (app) => {
       
       WHERE articles.article_id = ?`, [req.params.articleID]);
 
-      let [latestnews] = await db.execute(`SELECT newscategories.category_id, newscategories.categoryName, articles.article_id, articles.article_title, articleImage.img_src, articles.article_postdate
-      FROM newscategories
-      INNER JOIN articles ON fk_category_id = newscategories.category_id
-      INNER JOIN images as articleImage ON articles.fk_img_id = articleImage.img_id
-      WHERE articles.article_id = (
-         SELECT articles.article_id
-         FROM articles
-         WHERE 	articles.fk_category_id = newscategories.category_id
-         ORDER BY articles.article_postdate DESC
-         limit 1)
-      ORDER by articles.article_postdate desc`)
+      let latestnews = await latestnewsFunc()
 
-      let [popularNews] = await db.execute(`SELECT article_title, article_postdate, article_likes, article_id
-      FROM articles
-      ORDER BY article_likes desc
-      limit 4`)
+      let popularNews = await popularNewsFunc();
 
       res.render('single-post', {
          "articlePost": articlePost[0],
@@ -306,7 +298,7 @@ module.exports = (app) => {
       });
    });
 
-   app.get('/test/', async (req, res, next) => {
+   app.get('/test', async (req, res, next) => {
       let db = await mysql.connect();
       let [shownCategory] = await db.execute(`SELECT article_title, article_postdate, article_likes
       FROM articles
@@ -315,4 +307,15 @@ module.exports = (app) => {
 
       res.send(shownCategory)
    });
+
+   app.get('/fisk/:fishnumber', async (req, res, next) => {
+      
+      let fishData = {
+         amount: req.params.fishnumber
+      }
+
+      res.render('fisk',{
+      "fish": fishData
+   })
+   })
 };
