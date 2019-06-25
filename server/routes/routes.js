@@ -308,10 +308,11 @@ module.exports = (app) => {
       res.send(shownCategory)
    });
 
-   app.get('/fisk/:fishnumber', async (req, res, next) => {
+   app.get('/fisk/:fishnumber/:type', async (req, res, next) => {
       
       let fishData = {
-         amount: req.params.fishnumber
+         amount: req.params.fishnumber,
+         type: req.params.type
       }
 
       res.render('fisk',{

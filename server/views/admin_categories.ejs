@@ -1,0 +1,27 @@
+<h1>Admin Panel - Categories</h1>
+
+<form method="post">
+    <input name="categoryNameInput" type="text">
+    <button>Send</button>
+</form>
+
+<table>
+<tr>
+    <th></th>
+    <th>Category ID</th>
+    <th>Category Name</th>
+</tr>
+
+<% if(typeof categories != 'undefined') { %>
+<% categories.forEach(category => { %>
+    <tr>
+        <td>
+            <a href="/admin/categories/edit<%=category.category_id%>">Edit</a>
+            <a href="/admin/categories/delete/<%=category.category_id%>">Delete</a>
+        </td>
+        <td><%= category.category_id%></td>
+        <td><%= category.categoryName%></td>
+    </tr>
+<% }); %>
+<% } %>
+</table>
