@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 14, 2019 at 11:39 AM
+-- Generation Time: Jun 28, 2019 at 08:21 AM
 -- Server version: 10.3.15-MariaDB
 -- PHP Version: 7.3.6
 
@@ -115,6 +115,31 @@ INSERT INTO `images` (`img_id`, `name`, `img_src`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `messages`
+--
+
+CREATE TABLE `messages` (
+  `message_id` int(11) NOT NULL,
+  `message_name` varchar(25) NOT NULL,
+  `message_email` varchar(25) NOT NULL,
+  `message_subject` varchar(25) NOT NULL,
+  `message_text` varchar(1000) NOT NULL,
+  `message_date` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `messages`
+--
+
+INSERT INTO `messages` (`message_id`, `message_name`, `message_email`, `message_subject`, `message_text`, `message_date`) VALUES
+(1, 'asdf', 'hemming@gmail.com', 'asdf', 'asdf', '2019-06-18 09:27:34'),
+(2, 'asdf', 'hemming@gmail.com', 'asdf', 'asdf', '2019-06-18 09:30:19'),
+(3, 'asdf', 'hemming@gmail.com', 'asdf', 'asdf', '2019-06-18 09:30:21'),
+(4, 'asdf', 'hemming@gmail.com', 'asdf', 'asdf', '2019-06-18 09:30:24');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `newscategories`
 --
 
@@ -135,7 +160,8 @@ INSERT INTO `newscategories` (`category_id`, `categoryName`) VALUES
 (5, 'Breaking News'),
 (6, 'Buisness'),
 (7, 'Technology'),
-(8, 'Sport');
+(8, 'Sport'),
+(9, 'asdf');
 
 -- --------------------------------------------------------
 
@@ -178,6 +204,12 @@ ALTER TABLE `images`
   ADD PRIMARY KEY (`img_id`);
 
 --
+-- Indexes for table `messages`
+--
+ALTER TABLE `messages`
+  ADD PRIMARY KEY (`message_id`);
+
+--
 -- Indexes for table `newscategories`
 --
 ALTER TABLE `newscategories`
@@ -212,10 +244,16 @@ ALTER TABLE `images`
   MODIFY `img_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
+-- AUTO_INCREMENT for table `messages`
+--
+ALTER TABLE `messages`
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `newscategories`
 --
 ALTER TABLE `newscategories`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `positions`
